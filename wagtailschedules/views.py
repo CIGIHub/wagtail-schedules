@@ -11,7 +11,10 @@ from wagtail.admin.views.reports.base import PageReportView
 from wagtail.core.models import Page, UserPagePermissionsProxy
 from wagtail.admin import messages
 from django.utils import timezone
-from wagtail.core.models import PageRevision
+try:
+    from wagtail.core.models import PageRevision
+except ImportError:
+    from wagtail.core.models import Revision as PageRevision
 
 # Possible Homepagepanel
 from wagtail.admin.ui.components import Component
