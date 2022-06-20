@@ -51,7 +51,7 @@ class ScheduledPagesReportFilterSet(WagtailFilterSet):
 
 class ScheduledPagesView(PageReportView):
     template_name = "wagtailadmin/reports/scheduled_pages.html"
-    title = _("Scheduled scheduled for publishing")
+    title = _("Pages scheduled for publishing")
     header_icon = "time"
     list_export = PageReportView.list_export 
     filterset_class = ScheduledPagesReportFilterSet
