@@ -40,7 +40,7 @@
                                 </div>
                                 <ul class="actions">
                                     {% if page_perms.can_publish %}
-                                    <form action="{% url 'wagtailschedules:publish_now' page.id %}" method="post">
+                                    <form action="{% url 'wagtailschedules:publish' page.id %}" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="next" value="{{ request.path }}">
                                         <button type="submit" class="button button-secondary button-small">{% trans 'Publish now' %}</button>

@@ -1,11 +1,16 @@
-from django.urls import path
+from django.urls import path, include
 
-from .views import ScheduledPagesView, publish_all_scheduled_now, publish_now
+from .views import ScheduledPagesView, publish_all_scheduled, publish_all_scheduled_confirm, publish
 
 app_name = 'wagtailschedules'
 
+scheduled_patterns = ([
+    path("", ScheduledPagesView.as_view(), name="scheduled_pages"),
+    path("<int:page_id>/publish/", publish, name='publish'),
+    path("publish_all/", publish_all_scheduled, name='publish_all'),
+    path("publish_all/confirm/", publish_all_scheduled_confirm, name='publish_all_confirm'),
+], app_name)
+
 urlpatterns = [
-    path("reports/scheduled", ScheduledPagesView.as_view(), name="scheduled_pages"),
-    path("reports/scheduled/<int:page_id>/publish_now/", publish_now, name='publish_now'),
-    path("reports/scheduled/publish_all_now/", publish_all_scheduled_now, name='publish_all_now'),
+    path("scheduled/", include(scheduled_patterns)),
 ]

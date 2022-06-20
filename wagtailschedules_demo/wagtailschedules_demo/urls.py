@@ -11,7 +11,6 @@ urlpatterns = [
 
     path('admin/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
-    path('reports/schedules/', include(wagtailschedules_urls)),
 
 ]
 

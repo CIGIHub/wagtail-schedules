@@ -9,9 +9,9 @@
 {% endblock %}
 
 {% block actions %}
-    {% if perms.can_publish %}
+    {% if object_list.count > 0 %}
     <div class="addbutton">
-        <a href="{% url 'wagtailschedules:publish_all_now' %}" class="button">{% trans 'Publish all scheduled pages' %}</a>
+        <a href="{% url 'wagtailschedules:publish_all_confirm' %}" class="button">{% trans 'Publish all scheduled pages' %}</a>
     </div>
     {% endif %}
     {{ block.super }}

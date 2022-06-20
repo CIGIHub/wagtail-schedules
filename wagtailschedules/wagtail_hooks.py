@@ -5,6 +5,7 @@ from wagtail.admin.menu import MenuItem
 from wagtail.core.models import UserPagePermissionsProxy
 from .views import ScheduledPagesPanel
 from django.utils.translation import gettext_lazy as _
+from .urls import urlpatterns
 
 
 @hooks.register('construct_homepage_panels')
@@ -24,3 +25,7 @@ def register_scheduled_pages_menu_item():
         icon_name="time",
         order=700,
     )
+
+@hooks.register('register_admin_urls')
+def register_admin_urls():
+    return urlpatterns
