@@ -125,11 +125,10 @@ def publish_all_scheduled(request):
     if request.method == "POST":
         new_go_live_timestamp =  timezone.now() - timedelta(seconds=1)
         revisions_to_publish = get_pages_for_user(request)
-        for rp in revisions_to_publish:
-            page = rp.page
+        for page in revisions_to_publish:
             page.go_live_at = new_go_live_timestamp
             page.save()
-            revision = page.save_revision(
+            revision = page.specific.save_revision(
                 user=request.user,
                 log_action=True)
             revision.publish()
