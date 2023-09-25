@@ -2,7 +2,7 @@ from wagtail import hooks
 from django.urls import path
 from django.urls import reverse
 from wagtail.admin.menu import MenuItem
-from wagtail.models import UserPagePermissionsProxy
+from wagtail.permission_policies.pages import PagePermissionPolicy
 from .views import ScheduledPagesPanel
 from django.utils.translation import gettext_lazy as _
 from .urls import urlpatterns
@@ -15,7 +15,7 @@ def register_scheduled_pages_panel(request, panels):
 
 class ScheduledPagesMenuItem(MenuItem):
     def is_shown(self, request):
-        return UserPagePermissionsProxy(request.user).can_publish_pages()
+        return PagePermissionPolicy.user_has_permission(request.user, "publish")
 
 @hooks.register("register_reports_menu_item")
 def register_scheduled_pages_menu_item():
