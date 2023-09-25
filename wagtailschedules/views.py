@@ -11,12 +11,12 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
 from wagtail.admin.filters import DateRangePickerWidget, WagtailFilterSet
 from wagtail.admin.views.reports.base import PageReportView
-from wagtail.core.models import Page, UserPagePermissionsProxy
+from wagtail.models import Page, UserPagePermissionsProxy
 
 try:
-    from wagtail.core.models import PageRevision
+    from wagtail.models import PageRevision
 except ImportError:
-    from wagtail.core.models import Revision as PageRevision
+    from wagtail.models import Revision as PageRevision
 
 # Possible Homepagepanel
 from wagtail.admin.ui.components import Component

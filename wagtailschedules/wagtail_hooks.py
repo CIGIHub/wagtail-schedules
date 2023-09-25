@@ -1,8 +1,8 @@
-from wagtail.core import hooks
+from wagtail import hooks
 from django.urls import path
 from django.urls import reverse
 from wagtail.admin.menu import MenuItem
-from wagtail.core.models import UserPagePermissionsProxy
+from wagtail.models import UserPagePermissionsProxy
 from .views import ScheduledPagesPanel
 from django.utils.translation import gettext_lazy as _
 from .urls import urlpatterns
