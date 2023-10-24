@@ -24,12 +24,13 @@ from wagtail.admin.ui.components import Component
 
 
 def get_pages_for_user(request):
+    permission_policy = PagePermissionPolicy()
     pages = (
         Page.objects.annotate_approved_schedule()
         .filter(_approved_schedule=True)
         .prefetch_related("content_type") 
         .order_by("-first_published_at")
-        & PagePermissionPolicy.instances_user_has_permission_for(request.user, "publish")
+        & permission_policy.instances_user_has_permission_for(request.user, "publish")
     )
 
     if getattr(settings, "WAGTAIL_I18N_ENABLED", False):
@@ -79,7 +80,8 @@ class ScheduledPagesView(PageReportView):
         return super().get_queryset()
 
     def dispatch(self, request, *args, **kwargs):
-        if not UserPagePermissionsProxy(request.user).can_publish_pages():
+        permission_policy = PagePermissionPolicy()
+        if not permission_policy.instances_user_has_permission_for(request.user, "publish"):
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
 
