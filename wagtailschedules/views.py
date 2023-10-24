@@ -12,7 +12,7 @@ from wagtail.admin import messages
 from wagtail.admin.filters import DateRangePickerWidget, WagtailFilterSet
 from wagtail.admin.views.reports.base import PageReportView
 from wagtail.models import Page, UserPagePermissionsProxy
-from wagtail.permission_policies.pages.PagePermissionPolicy import instances_user_has_permission_for
+from wagtail.permission_policies.pages import PagePermissionPolicy
 
 try:
     from wagtail.models import PageRevision
@@ -29,7 +29,7 @@ def get_pages_for_user(request):
         .filter(_approved_schedule=True)
         .prefetch_related("content_type") 
         .order_by("-first_published_at")
-        & instances_user_has_permission_for(request.user, "publish")
+        & PagePermissionPolicy.instances_user_has_permission_for(request.user, "publish")
     )
 
     if getattr(settings, "WAGTAIL_I18N_ENABLED", False):
