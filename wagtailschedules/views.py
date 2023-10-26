@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
 from wagtail.admin.filters import DateRangePickerWidget, WagtailFilterSet
 from wagtail.admin.views.reports.base import PageReportView
-from wagtail.models import Page, UserPagePermissionsProxy
+from wagtail.models import Page, UserPagePermissionsProxy, Revision
 from wagtail.permission_policies.pages import PagePermissionPolicy
 
 try:
@@ -25,13 +25,12 @@ from wagtail.admin.ui.components import Component
 
 def get_pages_for_user(request):
     permission_policy = PagePermissionPolicy()
-    pages = (
-        Page.objects.annotate_approved_schedule()
-        .filter(_approved_schedule=True)
-        .prefetch_related("content_type") 
-        .order_by("-first_published_at")
-        & permission_policy.instances_user_has_permission_for(request.user, "publish")
+    revisions = Revision.objects.filter(
+        approved_go_live_at__gt=timezone.now()
     )
+    object_ids = revisions.values_list('object_id', flat=True)
+    id_integers = [int(object_id) for object_id in object_ids]
+    pages = (Page.objects.filter(id__in=id_integers) & permission_policy.instances_user_has_permission_for(request.user, "publish"))
 
     if getattr(settings, "WAGTAIL_I18N_ENABLED", False):
         pages = pages.select_related("locale")
@@ -46,7 +45,6 @@ class ScheduledPagesPanel(Component):
     def get_context_data(self, parent_context):
         request = parent_context["request"]
         context = super().get_context_data(parent_context)
-        user_perms = UserPagePermissionsProxy(request.user)
         context["pages_to_be_scheduled"] = get_pages_for_user(request)
         context["request"] = request
         context["csrf_token"] = parent_context["csrf_token"]
@@ -54,7 +52,8 @@ class ScheduledPagesPanel(Component):
 
 
 class ScheduledPagesReportFilterSet(WagtailFilterSet):
-    go_live_at = django_filters.DateFromToRangeFilter(widget=DateRangePickerWidget)
+    go_live_at = django_filters.DateFromToRangeFilter(
+        widget=DateRangePickerWidget)
 
     class Meta:
         model = Page
@@ -65,7 +64,7 @@ class ScheduledPagesView(PageReportView):
     template_name = "wagtailadmin/reports/scheduled_pages.html"
     title = _("Pages scheduled for publishing")
     header_icon = "time"
-    list_export = PageReportView.list_export 
+    list_export = PageReportView.list_export
     filterset_class = ScheduledPagesReportFilterSet
 
     def get_filename(self):
@@ -74,8 +73,6 @@ class ScheduledPagesView(PageReportView):
         )
 
     def get_queryset(self):
-        user_perms = UserPagePermissionsProxy(self.request.user)
-        
         self.queryset = get_pages_for_user(self.request)
         return super().get_queryset()
 
@@ -91,18 +88,19 @@ def publish(request, page_id):
     if not page.permissions_for_user(request.user).can_publish():
         raise PermissionDenied
 
-    new_go_live_timestamp = timezone.now() - timedelta(seconds = 1)
+    new_go_live_timestamp = timezone.now() - timedelta(seconds=1)
     page.go_live_at = new_go_live_timestamp
     page.save()
-     # Save revision
+    # Save revision
     revision = page.save_revision(
         user=request.user,
         log_action=True)
     revision.publish()
 
-    messages.success(request, _("Page '{0}' has been published.").format(page.get_admin_display_title()), extra_tags='time')
+    messages.success(request, _("Page '{0}' has been published.").format(
+        page.get_admin_display_title()), extra_tags='time')
 
-     # Redirect
+    # Redirect
     redirect_to = request.POST.get('next', None)
     if redirect_to and url_has_allowed_host_and_scheme(url=redirect_to, allowed_hosts={request.get_host()}):
         return redirect(redirect_to)
@@ -125,7 +123,7 @@ def publish_all_scheduled_confirm(request):
 
 def publish_all_scheduled(request):
     if request.method == "POST":
-        new_go_live_timestamp =  timezone.now() - timedelta(seconds=1)
+        new_go_live_timestamp = timezone.now() - timedelta(seconds=1)
         revisions_to_publish = get_pages_for_user(request)
         for page in revisions_to_publish:
             page.go_live_at = new_go_live_timestamp
@@ -135,7 +133,8 @@ def publish_all_scheduled(request):
                 log_action=True)
             revision.publish()
 
-        messages.success(request, _("{0} pages have been published.").format(len(revisions_to_publish)), extra_tags='time')
+        messages.success(request, _("{0} pages have been published.").format(
+            len(revisions_to_publish)), extra_tags='time')
 
         # Redirect
         redirect_to = request.POST.get('next', None)
@@ -143,4 +142,3 @@ def publish_all_scheduled(request):
             return redirect(redirect_to)
         else:
             return redirect('wagtailschedules:scheduled_pages')
-        
