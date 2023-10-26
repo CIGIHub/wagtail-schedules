@@ -12,7 +12,6 @@ from wagtail.admin import messages
 from wagtail.admin.filters import DateRangePickerWidget, WagtailFilterSet
 from wagtail.admin.views.reports.base import PageReportView
 from wagtail.core.models import Page, UserPagePermissionsProxy
-from wagtail.permission_policies.pages.PagePermissionPolicy import instances_user_has_permission_for
 
 try:
     from wagtail.core.models import PageRevision
@@ -24,13 +23,13 @@ from wagtail.admin.ui.components import Component
 
 
 def get_pages_for_user(request):
-    user = request.user
+    user_perms = UserPagePermissionsProxy(request.user)
     pages = (
         Page.objects.annotate_approved_schedule()
         .filter(_approved_schedule=True)
         .prefetch_related("content_type") 
         .order_by("-first_published_at")
-        & instances_user_has_permission_for(user, "publish") 
+        & user_perms.publishable_pages()
     )
 
     if getattr(settings, "WAGTAIL_I18N_ENABLED", False):
