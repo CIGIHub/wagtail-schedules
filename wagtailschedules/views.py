@@ -25,12 +25,14 @@ from wagtail.admin.ui.components import Component
 
 def get_pages_for_user(request):
     permission_policy = PagePermissionPolicy()
-    revisions = Revision.objects.filter(
-        approved_go_live_at__gt=timezone.now()
+
+    pages = (
+        Page.objects.annotate_approved_schedule()
+        .filter(_approved_schedule=True)
+        .prefetch_related("content_type") 
+        .order_by("-first_published_at")
+        & permission_policy.instances_user_has_permission_for(request.user, "publish")
     )
-    object_ids = revisions.values_list('object_id', flat=True)
-    id_integers = [int(object_id) for object_id in object_ids]
-    pages = (Page.objects.filter(id__in=id_integers) & permission_policy.instances_user_has_permission_for(request.user, "publish"))
 
     if getattr(settings, "WAGTAIL_I18N_ENABLED", False):
         pages = pages.select_related("locale")
