@@ -11,15 +11,10 @@ from .urls import urlpatterns
 @hooks.register('construct_homepage_panels')
 def register_scheduled_pages_panel(request, panels):
     panels.append(ScheduledPagesPanel())
-    
-
-class ScheduledPagesMenuItem(MenuItem):
-    def is_shown(self, request):
-        return PagePermissionPolicy(request.user).user_has_permission(request.user, "publish")
 
 @hooks.register("register_reports_menu_item")
 def register_scheduled_pages_menu_item():
-    return ScheduledPagesMenuItem(
+    return MenuItem(
         _("Scheduled pages"),
         reverse("wagtailschedules:scheduled_pages"),
         icon_name="time",
