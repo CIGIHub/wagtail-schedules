@@ -2,8 +2,8 @@ from django.db import models
 from wagtail.admin.edit_handlers import (FieldPanel, FieldRowPanel,
                                          InlinePanel, MultiFieldPanel,
                                          PageChooserPanel, StreamFieldPanel)
-from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Page
+from wagtail.fields import RichTextField, StreamField
+from wagtail.models import Page
 
 from .blocks import ContentBlocks
 from wagtail.images.models import Image
