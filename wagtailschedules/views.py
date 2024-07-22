@@ -12,7 +12,9 @@ from wagtail.admin import messages
 from wagtail.admin.filters import DateRangePickerWidget, WagtailFilterSet
 from wagtail.admin.views.reports.base import PageReportView
 from wagtail.models import Page
-from wagtail.permission_policies.pages import UserPagePermissionsProxy
+# from wagtail.permission_policies.pages import UserPagePermissionsProxy
+from wagtail.permission_policies.pages import PagePermissionPolicy
+
 
 try:
     from wagtail.models import PageRevision
@@ -24,7 +26,8 @@ from wagtail.admin.ui.components import Component
 
 
 def get_pages_for_user(request):
-    user_perms = UserPagePermissionsProxy(request.user)
+    # user_perms = UserPagePermissionsProxy(request.user)
+    user_perms = PagePermissionPolicy()
     pages = (
         Page.objects.annotate_approved_schedule()
         .filter(_approved_schedule=True)
@@ -46,7 +49,8 @@ class ScheduledPagesPanel(Component):
     def get_context_data(self, parent_context):
         request = parent_context["request"]
         context = super().get_context_data(parent_context)
-        user_perms = UserPagePermissionsProxy(request.user)
+        # user_perms = UserPagePermissionsProxy(request.user)
+        user_perms = PagePermissionPolicy()
         context["pages_to_be_scheduled"] = get_pages_for_user(request)
         context["request"] = request
         context["csrf_token"] = parent_context["csrf_token"]
@@ -74,13 +78,15 @@ class ScheduledPagesView(PageReportView):
         )
 
     def get_queryset(self):
-        user_perms = UserPagePermissionsProxy(self.request.user)
+        # user_perms = UserPagePermissionsProxy(self.request.user)
+        user_perms = PagePermissionPolicy()
         
         self.queryset = get_pages_for_user(self.request)
         return super().get_queryset()
 
     def dispatch(self, request, *args, **kwargs):
-        if not UserPagePermissionsProxy(request.user).can_publish_pages():
+        # if not UserPagePermissionsProxy(request.user).can_publish_pages():
+        if not PagePermissionPolicy().permission_policy.instances_user_has_permission_for(request.user, "publish").exists():
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
 
