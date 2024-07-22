@@ -33,7 +33,8 @@ def get_pages_for_user(request):
         .filter(_approved_schedule=True)
         .prefetch_related("content_type") 
         .order_by("-first_published_at")
-        & user_perms.publishable_pages()
+        # & user_perms.publishable_pages()
+        & user_perms.instances_user_has_permission_for(request.user, "publish")
     )
 
     if getattr(settings, "WAGTAIL_I18N_ENABLED", False):
