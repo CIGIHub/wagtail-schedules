@@ -11,7 +11,8 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
 from wagtail.admin.filters import DateRangePickerWidget, WagtailFilterSet
 from wagtail.admin.views.reports.base import PageReportView
-from wagtail.models import Page, UserPagePermissionsProxy
+from wagtail.models import Page
+from wagtail.permission_policies.pages import UserPagePermissionsProxy
 
 try:
     from wagtail.models import PageRevision
