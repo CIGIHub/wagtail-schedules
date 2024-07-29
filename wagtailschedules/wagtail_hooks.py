@@ -15,7 +15,7 @@ def register_scheduled_pages_panel(request, panels):
 
 class ScheduledPagesMenuItem(MenuItem):
     def is_shown(self, request):
-        return PagePermissionPolicy(request.user).user_has_permission(request.user, "publish")
+        return PagePermissionPolicy().user_has_permission(request.user, "publish")
 
 @hooks.register("register_reports_menu_item")
 def register_scheduled_pages_menu_item():
